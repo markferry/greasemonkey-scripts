@@ -28,12 +28,12 @@
         '(inches|inch|")': function(x, p1, p2, p3) { return distance_for_output(p1+p2, inch_to_meter)+p3; },
         '(feet|foot|ft)': function(x, p1, p2, p3) { return distance_for_output(p1+p2, foot_to_meter)+p3; },
 
-        '(ounces|ounce|oz)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, ounce_to_gram)+p3; },
-        '(pounds|pound|lb|lbs)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, pound_to_gram)+p3; },
-        '(stones|stone|s)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, stone_to_gram)+p3; },
+        '(ounces?|oz)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, ounce_to_gram)+p3; },
+        '(pounds?|lb|lbs)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, pound_to_gram)+p3; },
+        '(stones?|s)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, stone_to_gram)+p3; },
 
-        '(gallons|gal)': function(x, p1, p2, p3) { return volume_for_output(p1+p2, gallon_to_litre)+p3; },
-        '(US\\s+gallons)': function(x, p1, p2, p3) { return volume_for_output(p1+p2, gallon_us_to_litre)+p3; },
+        '(gallons?|gal)': function(x, p1, p2, p3) { return volume_for_output(p1+p2, gallon_to_litre)+p3; },
+        '(US\\s+gallons?)': function(x, p1, p2, p3) { return volume_for_output(p1+p2, gallon_us_to_litre)+p3; },
 
         'Â°F': function(x) { var f=parseFloat(x, p1, p2, p3); return for_output(p1+p2, my_round(fahr_to_degree(x)))+p3; },
         'degrees\s*Fahrenheit': function(x, p1, p2, p3) { return for_output(p1+p2, my_round(fahr_to_degree(x)))+p3; },
