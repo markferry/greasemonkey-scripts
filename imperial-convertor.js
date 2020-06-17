@@ -35,8 +35,10 @@
         '(gallons?|gal)': function(x, p1, p2, p3) { return volume_for_output(p1+p2, gallon_to_litre)+p3; },
         '(US\\s+gallons?)': function(x, p1, p2, p3) { return volume_for_output(p1+p2, gallon_us_to_litre)+p3; },
 
-        'Â°F': function(x) { var f=parseFloat(x, p1, p2, p3); return for_output(p1+p2, my_round(fahr_to_degree(x)))+p3; },
-        'degrees\s*Fahrenheit': function(x, p1, p2, p3) { return for_output(p1+p2, my_round(fahr_to_degree(x)))+p3; },
+        // also convert \u00b0 F and \u2109
+        '(degrees? fahrenheit| F|°F|℉)': function(x, p1, p2, p3) {
+            return temperature_for_output(p1+p2, fahr_to_degree)+p3;
+        },
 
         '':''};
 
@@ -54,7 +56,9 @@
     var gallon_to_litre=4.54609;
     var gallon_us_to_litre=3.7854;
 
-    var fahr_to_degree=function(x) { return ((f-32)*5/9)+"Â°C"; }
+    var fahr_to_degree=function(f) {
+        return (f-32)*5/9;
+    }
 
 
     function my_round(x) { return Math.round(x*1e3)/1e3; }
@@ -69,6 +73,7 @@
     function sensible_distance(meter) { return sensible_unit(meter, ["mm", "m", "km"]); }
     function sensible_mass(mass) { return sensible_unit(mass, ["mg", "g", "kg", "ton"]); }
     function sensible_volume(volume) { return sensible_unit(volume, ["mL", "L", "kL"]); }
+    function sensible_temperature(t) { return my_round(t).toString()+" ℃"; }
 
     // I haven't found a way yet to edit the innerHTML of a XPath node :(
     function stylize(x) { return "<span style='font-size:x-small; color:grey;'>"+x+"</span>"; }
@@ -78,6 +83,11 @@
     function distance_for_output(x, mult) { return for_output(x, sensible_distance(parseFloat(x.replace(",",""))*mult)); }
     function mass_for_output(x, mult) { return for_output(x, sensible_mass(parseFloat(x.replace(",",""))*mult)); }
     function volume_for_output(x, mult) { return for_output(x, sensible_volume(parseFloat(x.replace(",",""))*mult)); }
+    function temperature_for_output(x, func) {
+        return for_output(x, sensible_temperature(
+                func(parseFloat(x.replace(",","")))
+        ));
+    }
 
     delete imperials['']; // so the user can add each entry ending with a comma,
       // I put an extra empty key/value pair in the object.
