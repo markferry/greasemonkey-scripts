@@ -32,6 +32,9 @@
         '(pounds|pound|lb|lbs)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, pound_to_gram)+p3; },
         '(stones|stone|s)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, stone_to_gram)+p3; },
 
+        '(gallons|gal)': function(x, p1, p2, p3) { return volume_for_output(p1+p2, gallon_to_litre)+p3; },
+        '(US\\s+gallons)': function(x, p1, p2, p3) { return volume_for_output(p1+p2, gallon_us_to_litre)+p3; },
+
         'Â°F': function(x) { var f=parseFloat(x, p1, p2, p3); return for_output(p1+p2, my_round(fahr_to_degree(x)))+p3; },
         'degrees\s*Fahrenheit': function(x, p1, p2, p3) { return for_output(p1+p2, my_round(fahr_to_degree(x)))+p3; },
 
@@ -47,6 +50,10 @@
     var ounce_to_gram=28.35;
     var pound_to_gram=453.59237;
     var stone_to_gram=6350.29318;
+
+    var gallon_to_litre=4.54609;
+    var gallon_us_to_litre=3.7854;
+
     var fahr_to_degree=function(x) { return ((f-32)*5/9)+"Â°C"; }
 
 
@@ -61,6 +68,7 @@
     }
     function sensible_distance(meter) { return sensible_unit(meter, ["mm", "m", "km"]); }
     function sensible_mass(mass) { return sensible_unit(mass, ["mg", "g", "kg", "ton"]); }
+    function sensible_volume(volume) { return sensible_unit(volume, ["mL", "L", "kL"]); }
 
     // I haven't found a way yet to edit the innerHTML of a XPath node :(
     function stylize(x) { return "<span style='font-size:x-small; color:grey;'>"+x+"</span>"; }
@@ -69,6 +77,7 @@
     function for_output(x, converted) { return x+stylize("[="+converted+"]"); }
     function distance_for_output(x, mult) { return for_output(x, sensible_distance(parseFloat(x.replace(",",""))*mult)); }
     function mass_for_output(x, mult) { return for_output(x, sensible_mass(parseFloat(x.replace(",",""))*mult)); }
+    function volume_for_output(x, mult) { return for_output(x, sensible_volume(parseFloat(x.replace(",",""))*mult)); }
 
     delete imperials['']; // so the user can add each entry ending with a comma,
       // I put an extra empty key/value pair in the object.
