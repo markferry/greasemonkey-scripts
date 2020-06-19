@@ -103,20 +103,20 @@
     }
 
     function distance_for_output(x, mult) {
-        return for_output(x, sensible_distance(parseFloat(x.replace(",",""))*mult));
+        return for_output(x, sensible_distance(parseFloat(x.replace(/,/g,""))*mult));
     }
 
     function mass_for_output(x, mult) {
-        return for_output(x, sensible_mass(parseFloat(x.replace(",",""))*mult));
+        return for_output(x, sensible_mass(parseFloat(x.replace(/,/g,""))*mult));
     }
 
     function volume_for_output(x, mult) {
-        return for_output(x, sensible_volume(parseFloat(x.replace(",",""))*mult));
+        return for_output(x, sensible_volume(parseFloat(x.replace(/,/g,""))*mult));
     }
 
     function temperature_for_output(x, func) {
         return for_output(x, sensible_temperature(
-                func(parseFloat(x.replace(",","")))
+                func(parseFloat(x.replace(/,/g,"")))
         ));
     }
 
