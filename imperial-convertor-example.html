@@ -95,11 +95,49 @@
         <td>10'</td>
         <td><pre>Foot as single quote</pre></td>
     </tr>
+
     <tr>
         <td>
-            5'6" != 1.676m<br/>
+            0'0"<br/>
+            0'11"<br/>
+            12'11"<br/>
+            13'11"<br/>
         </td>
-        <td><pre>Can't parse feet and inches together</pre></td>
+        <td><pre>Feet and inches</pre></td>
+    </tr>
+    <tr>
+        <td>
+            0'12"<br/>
+        </td>
+        <td><pre>>11 inches</pre></td>
+    </tr>
+    <tr>
+        <td>
+            1'2<br/>
+        </td>
+        <td><pre>Missing unit</pre></td>
+    </tr>
+    <tr>
+        <td>
+            1'1'<br/>
+            2"2"<br/>
+      </td>
+        <td><pre>Duplicate units</pre></td>
+    </tr>
+    <tr>
+        <td>
+            0'0'0"<br/>
+            0'0"0"<br/>
+        </td>
+        <td><pre>Mixed triplicates</pre></td>
+    </tr>
+    <tr>
+        <td>
+            '"<br/>
+            0'"<br/>
+            '0"<br/>
+        </td>
+        <td><pre>Missing values</pre></td>
     </tr>
 
     <tr>
