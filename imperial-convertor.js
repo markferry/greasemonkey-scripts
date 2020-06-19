@@ -25,8 +25,10 @@
 
     var imperials = {
         '(miles|mile|mi)': function(x, p1, p2, p3) { return distance_for_output(p1+p2, mile_to_meter)+p3; },
-        '(inches|inch|"|\'\')': function(x, p1, p2, p3) { return distance_for_output(p1+p2, inch_to_meter)+p3; },
-        '(feet|foot|ft|\'(?!\'))': function(x, p1, p2, p3) { return distance_for_output(p1+p2, foot_to_meter)+p3; },
+        // also convert \u2033 double-prime
+        '(inches|inch|"|″|\'\')': function(x, p1, p2, p3) { return distance_for_output(p1+p2, inch_to_meter)+p3; },
+        // also convert \u2032 single-prime
+        '(feet|foot|ft|′|\'(?!\'))': function(x, p1, p2, p3) { return distance_for_output(p1+p2, foot_to_meter)+p3; },
 
         '(ounces?|oz)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, ounce_to_gram)+p3; },
         '(pounds?|lb|lbs)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, pound_to_gram)+p3; },
