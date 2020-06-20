@@ -52,6 +52,9 @@
         '(nautical miles?|nmi)': function(x, p1, p2) {
             return for_output(p1+p2, convert(p1+"nmi", "m"));
         },
+        '(knots?|kts?|kns?)': function(x, p1, p2) {
+            return for_output(p1+p2, convert(p1+p2, "kph"));
+        },
 
         '(ounces?|oz|pounds?|lb|lbs|stones?|st)': function(x, p1, p2) {
           return for_output(p1+p2, convert_mass(p1+p2));
