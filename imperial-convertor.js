@@ -5,6 +5,7 @@
 // @downloadURL	https://jerous.org/att/2015/03/29/imperial-convertor/imperial-convertor.js
 // regexes don't support tld :(
 // @exclude        /https://(www\.|mail\.)?google.(be|com|co.uk|fr|ru)/.*/
+// @require https://raw.github.com/gentooboontoo/js-quantities/v1.7.5/build/quantities.js
 // @version	1.3
 // @copyright  2012, 2013, 2014, 2015, 2016, 2017 jerous
 // ==/UserScript==
@@ -20,24 +21,51 @@
 (function () {
     'use strict';
 
+    function convert(s, unit) {
+        var q = Qty.parse(s.replace(/,/g, "")).to(unit);
+        return format_si(q.scalar)+q.units();
+    }
+
+    function convert_mass(s) {
+        var q = Qty.parse(s.replace(/,/g, "")).to("g");
+        return sensible_mass(q.scalar);
+    }
+
+    function convert_temp(s, unit) {
+        var q = Qty.parse(s.replace(/,/g, "")).to("tempC");
+        return my_round(q.scalar) + " ℃";
+    }
+
     var prepend_rgx = String.raw`(\d[\d,.]*\s*)`;
     var append_rgx = '([^a-z]|$)';
 
     var imperials = {
-        '(miles|mile|mi)': function(x, p1, p2, p3) { return distance_for_output(p1+p2, mile_to_meter)+p3; },
-        '(inches|inch)': function(x, p1, p2, p3) { return distance_for_output(p1+p2, inch_to_meter)+p3; },
-        '(feet|foot|ft)': function(x, p1, p2, p3) { return distance_for_output(p1+p2, foot_to_meter)+p3; },
+        '(miles|mile|mi)': function(x, p1, p2, p3) {
+          return for_output(p1+p2, convert(p1+p2, "m"));
+        },
+        '(inches|inch)': function(x, p1, p2) {
+            return for_output(p1+p2, convert(p1+"in", "m"));
+        },
+        '(feet|foot|ft)': function(x, p1, p2) {
+            return for_output(p1+p2, convert(p1+"ft", "m"));
+        },
 
-        '(ounces?|oz)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, ounce_to_gram)+p3; },
-        '(pounds?|lb|lbs)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, pound_to_gram)+p3; },
-        '(stones?|st)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, stone_to_gram)+p3; },
+        '(ounces?|oz|pounds?|lb|lbs|stones?|st)': function(x, p1, p2) {
+          return for_output(p1+p2, convert_mass(p1+p2));
+        },
 
-        '(gallons?|gal)': function(x, p1, p2, p3) { return volume_for_output(p1+p2, gallon_to_litre)+p3; },
-        '(US\\s+gallons?)': function(x, p1, p2, p3) { return volume_for_output(p1+p2, gallon_us_to_litre)+p3; },
+        '(gallons?|gal)': function(x, p1, p2) {
+          return for_output(p1+p2, convert(p1+"gallon-imp", "L"));
+        },
+
+        '(US\\s+gallons?)': function(x, p1, p2) {
+          return for_output(p1+p2, convert(p1+"gal", "L"));
+        },
 
         // also convert \u00b0 F and \u2109
-        '(degrees? fahrenheit| F|°F|℉)': function(x, p1, p2, p3) {
-            return temperature_for_output(p1+p2, fahr_to_degree)+p3;
+        '(degrees? fahrenheit| F|°F|℉)': function(x, p1, p2) {
+            return for_output(p1+p2, convert_temp(p1+ "tempF"));
+
         },
 
     };
@@ -63,32 +91,23 @@
     }
 
     var compound_imperials = {
-      [f_i_rgx]: function(x, p1, p2, p3, p4) {
-        var inches = parseFeetAndInches(x);
-        return for_output(x, sensible_distance(inches * inch_to_meter));
-      }
-    }
-
-    var mile_to_meter = 1609.344; // Using the international mile definition
-    var inch_to_meter = 0.0254;
-    var foot_to_meter = 0.3048;
-    var yard_to_meter = 0.9144;
-
-    var ounce_to_gram = 28.35;
-    var pound_to_gram = 453.59237;
-    var stone_to_gram = 6350.29318;
-
-    var gallon_to_litre = 4.54609;
-    var gallon_us_to_litre = 3.7854;
-
-    var fahr_to_degree=function(f) {
-        return (f-32)*5/9;
+        [f_i_rgx]: function(x, p1, p2, p3, p4) {
+            var inches = parseFeetAndInches(x);
+            return for_output(x, convert(inches+"in", "m"));
+        }
     }
 
 
     function my_round(x) {
         return Math.round(x*1e3)/1e3;
     }
+
+    function format_si (n) {
+        var nn = n.toExponential(2).split(/e/);
+        var u = Math.floor(+nn[1] / 3);
+        return nn[0] * Math.pow(10, +nn[1] - u * 3) + ['p', 'n', 'u', 'm', '', 'k', 'M', 'G', 'T'][u+4];
+    }
+
 
     function sensible_unit(x, units) {
         x*=1e3;
@@ -110,13 +129,6 @@
         return sensible_unit(mass, ["mg", "g", "kg", "ton"]);
     }
 
-    function sensible_volume(volume) {
-        return sensible_unit(volume, ["mL", "L", "kL"]);
-    }
-
-    function sensible_temperature(t) {
-        return my_round(t).toString()+" ℃";
-    }
 
     // I haven't found a way yet to edit the innerHTML of a XPath node :(
     function stylize(x) {
@@ -125,24 +137,6 @@
 
     function for_output(x, converted) {
         return x+stylize("[="+converted+"]");
-    }
-
-    function distance_for_output(x, mult) {
-        return for_output(x, sensible_distance(parseFloat(x.replace(/,/g,""))*mult));
-    }
-
-    function mass_for_output(x, mult) {
-        return for_output(x, sensible_mass(parseFloat(x.replace(/,/g,""))*mult));
-    }
-
-    function volume_for_output(x, mult) {
-        return for_output(x, sensible_volume(parseFloat(x.replace(/,/g,""))*mult));
-    }
-
-    function temperature_for_output(x, func) {
-        return for_output(x, sensible_temperature(
-                func(parseFloat(x.replace(/,/g,"")))
-        ));
     }
 
 
