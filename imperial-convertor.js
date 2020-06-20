@@ -25,10 +25,8 @@
 
     var imperials = {
         '(miles|mile|mi)': function(x, p1, p2, p3) { return distance_for_output(p1+p2, mile_to_meter)+p3; },
-        // also convert \u2033 double-prime
-        '(inches|inch|"|″|\'\')': function(x, p1, p2, p3) { return distance_for_output(p1+p2, inch_to_meter)+p3; },
-        // also convert \u2032 single-prime
-        '(feet|foot|ft|′|\'(?!\'))': function(x, p1, p2, p3) { return distance_for_output(p1+p2, foot_to_meter)+p3; },
+        '(inches|inch)': function(x, p1, p2, p3) { return distance_for_output(p1+p2, inch_to_meter)+p3; },
+        '(feet|foot|ft)': function(x, p1, p2, p3) { return distance_for_output(p1+p2, foot_to_meter)+p3; },
 
         '(ounces?|oz)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, ounce_to_gram)+p3; },
         '(pounds?|lb|lbs)': function(x, p1, p2, p3) { return mass_for_output(p1+p2, pound_to_gram)+p3; },
@@ -44,7 +42,32 @@
 
     };
 
-    // Below are the definitions and helpers ...
+    // https://regex101.com/r/nZNHiv/7
+    //   1st alt captures 1:ft and 2:in
+    //   2nd alt captures 3:ft
+    //   3rd alt captures 4:ft
+    //
+    // also convert \u2032 single-prime and \u2033 double-prime
+    var f_i_rgx = /(?:(\d+)[\'\u2032](\d+)(?:\"|\'\'|\u2033)|(\d+(?:\.\d+)?)[\'\u2032](?!\')|(\d+(?:\.\d+)?)(?:\"|\'\'|\u2033))(?![\d[\'\"\u2032\u2033]\b])/
+
+    function parseFeetAndInches(s_fi){
+        var mfifi = f_i_rgx.exec(s_fi);
+
+        if (!mfifi) {
+            return NaN;
+        }
+
+        var feet = (parseFloat(mfifi[1]) || 0) + (parseFloat(mfifi[3]) || 0);
+        var inches = (parseFloat(mfifi[2]) || 0) + (parseFloat(mfifi[4]) || 0);
+        return feet * 12 + inches;
+    }
+
+    var compound_imperials = {
+      [f_i_rgx]: function(x, p1, p2, p3, p4) {
+        var inches = parseFeetAndInches(x);
+        return for_output(x, sensible_distance(inches * inch_to_meter));
+      }
+    }
 
     var mile_to_meter = 1609.344; // Using the international mile definition
     var inch_to_meter = 0.0254;
@@ -149,6 +172,10 @@
         rgxs.push(new RegExp(prepend_rgx+rgx+append_rgx, 'gi'));
         repls.push(imperials[rgx]);
     }
+
+    // 'for var in dict' doesn't work with regex keys
+    rgxs.push(f_i_rgx);
+    repls.push(compound_imperials[f_i_rgx]);
 
     // do the replacement
     var texts = document.evaluate(
