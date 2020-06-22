@@ -4,7 +4,7 @@
 // @description Converts imperial units to metric system
 // @downloadURL	https://jerous.org/att/2015/03/29/imperial-convertor/imperial-convertor.js
 // regexes don't support tld :(
-// @exclude        /https://(www\.|mail\.)?google.(be|com|co.uk|fr|ru)/.*/
+// @exclude        /https://(www\.|mail\.|calendar\.)?google.(be|com|co.uk|fr|ru)/.*/
 // @require https://raw.github.com/gentooboontoo/js-quantities/v1.7.5/build/quantities.js
 // @version	1.3
 // @copyright  2012, 2013, 2014, 2015, 2016, 2017 jerous
