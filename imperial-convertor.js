@@ -23,7 +23,7 @@
 
     function convert(s, unit) {
         var q = Qty.parse(s.replace(/,/g, "")).to(unit);
-        return format_si(q.scalar)+q.units();
+        return format_si(q);
     }
 
     function convert_mass(s) {
@@ -108,10 +108,12 @@
         return Math.round(x*1e3)/1e3;
     }
 
-    function format_si (n) {
-        var nn = n.toExponential(2).split(/e/);
+    function format_si(q) {
+        var nn = q.scalar.toExponential(2).split(/e/);
         var u = Math.floor(+nn[1] / 3);
-        return nn[0] * Math.pow(10, +nn[1] - u * 3) + ['p', 'n', 'u', 'm', '', 'k', 'M', 'G', 'T'][u+4];
+        var si = ['f', 'p', 'n', 'u', 'm', '', 'k', 'M', 'G', 'T', 'P'][u+5];
+        var q_si = q.to(si + q.units());
+        return q_si.toPrec(0.01);
     }
 
 
